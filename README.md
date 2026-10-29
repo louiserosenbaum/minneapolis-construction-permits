@@ -18,7 +18,7 @@
 
 3. **A small group of firms builds most commercial projects.** Of 4,712 contractors, **14 account for half** of commercial permit value. Mortenson leads with 9.6%, followed by Frana, Kraus-Anderson, Gardner Builders, and McGough.
 
-4. **Most big-ticket commercial permits are housing.** Of 225 commercial projects worth $10M or more, 128 are apartment or condo buildings, totaling $4.2B, more than offices ($0.9B) and hospitals ($0.7B) combined several times over.
+4. **Most big-ticket commercial permits are housing.** Of 225 commercial projects worth $10M or more, 128 are apartment or condo buildings, totaling $4.2B. That is more than 2.5 times offices ($0.9B) and hospitals ($0.7B) combined.
 
 5. **Activity is concentrated downtown.** Downtown West, North Loop, and Midtown Phillips hold a third of all permitted value across 87 neighborhoods.
 
