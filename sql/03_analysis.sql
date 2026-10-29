@@ -68,9 +68,29 @@ HAVING COUNT(*) >= 100;
 
 -- Q5. Large commercial projects (>= $10M) for the project map. Commercial only;
 -- no residential addresses or owner names are exported.
+-- building_type is derived from the free-text permit description, since the export has
+-- no clean use field. Rules run top to bottom; the first match wins. Projects whose
+-- description doesn't say what the building is stay "Other / unspecified".
 CREATE OR REPLACE TABLE major_projects AS
 SELECT
     permit_number,
+    CASE
+        WHEN regexp_matches(LOWER(comments), 'hospital|medical|clinic|surgery|patient')                                   THEN 'Hospital / medical'
+        WHEN regexp_matches(LOWER(comments), 'data center|datacenter')                                                    THEN 'Data center'
+        WHEN regexp_matches(LOWER(comments), 'school|university|college|academy|classroom|education|dormitor|residence hall') THEN 'School / university'
+        WHEN regexp_matches(LOWER(comments), 'hotel|guest room')                                                          THEN 'Hotel'
+        WHEN regexp_matches(LOWER(comments), 'stadium|arena|theater|theatre|venue|ballpark|concert|museum|scoreboard')    THEN 'Sports / entertainment'
+        WHEN regexp_matches(LOWER(comments), 'senior|assisted living|memory care|nursing')                                THEN 'Senior living'
+        WHEN regexp_matches(LOWER(comments), 'apartment|condo|dwelling unit|\d+\s*units?\b|multi.?family|townhome')
+             OR units_new > 0                                                                               THEN 'Apartments / condos'
+        WHEN regexp_matches(LOWER(comments), 'light rail|transit|bus garage|o&m facility')                                THEN 'Transit'
+        WHEN regexp_matches(LOWER(comments), 'church|community center|library|indian center|park board')                  THEN 'Civic / community'
+        WHEN regexp_matches(LOWER(comments), 'office|tenant improvement|t/i|occupancy:\s*b\b|core and shell|shell and core|floors? \d') THEN 'Office'
+        WHEN regexp_matches(LOWER(comments), 'parking ramp|parking structure|parking garage|\bramp\b')                     THEN 'Parking'
+        WHEN regexp_matches(LOWER(comments), 'warehouse|industrial|manufactur|distribution')                             THEN 'Industrial / warehouse'
+        WHEN regexp_matches(LOWER(comments), 'retail|restaurant|grocery|store|costco|target')                            THEN 'Retail'
+            ELSE 'Other / unspecified'
+    END AS building_type,
     YEAR(issued_at)        AS year,
     work_type,
     neighborhood,

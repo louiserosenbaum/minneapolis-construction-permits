@@ -18,7 +18,9 @@
 
 3. **A small group of firms builds most commercial projects.** Of 4,712 contractors, **14 account for half** of commercial permit value. Mortenson leads with 9.6%, followed by Frana, Kraus-Anderson, Gardner Builders, and McGough.
 
-4. **Activity is concentrated downtown.** Downtown West, North Loop, and Midtown Phillips hold a third of all permitted value across 87 neighborhoods.
+4. **Most big-ticket commercial permits are housing.** Of 225 commercial projects worth $10M or more, 128 are apartment or condo buildings, totaling $4.2B, more than offices ($0.9B) and hospitals ($0.7B) combined several times over.
+
+5. **Activity is concentrated downtown.** Downtown West, North Loop, and Midtown Phillips hold a third of all permitted value across 87 neighborhoods.
 
 ## So what
 
@@ -31,6 +33,8 @@ For a construction technology company selling into the Twin Cities, the commerci
 | Permits duplicated once per parcel (up to 510x) | One row per permit number |
 | Contractor names in free text (Mortenson appears 17 ways) | Removed punctuation and legal suffixes, then mapped known firms to one name |
 | Dates stored as text | Cast to timestamps |
+| No building-use field (hospital, apartments, office) | Classified large projects from the permit description with ordered keyword rules; unclear ones stay "Other / unspecified" |
+| Two permits with placeholder (0, 0) coordinates | Excluded from the project map |
 | Property owner names and applicant addresses | Dropped; analysis covers permits, contractors, and neighborhoods, not individuals |
 
 See [`sql/02_data_quality.sql`](sql/02_data_quality.sql) for the before-and-after comparison.
