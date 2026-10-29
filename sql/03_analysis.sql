@@ -83,4 +83,6 @@ SELECT
 FROM permits
 WHERE permit_type = 'Commercial'
   AND permit_value >= 10000000
-  AND YEAR(issued_at) BETWEEN 2017 AND 2025;
+  AND YEAR(issued_at) BETWEEN 2017 AND 2025
+  -- Two permits have placeholder coordinates of (0, 0); leave them off the map.
+  AND lat <> 0 AND lon <> 0;
