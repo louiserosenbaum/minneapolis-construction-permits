@@ -75,7 +75,7 @@ CREATE OR REPLACE TABLE major_projects AS
 SELECT
     permit_number,
     CASE
-        WHEN regexp_matches(LOWER(comments), 'hospital|medical|clinic|surgery|patient')                                   THEN 'Hospital / medical'
+        WHEN regexp_matches(LOWER(comments), 'hospital|medical|clinic|surgery|patient|behavioral health')                                   THEN 'Hospital / medical'
         WHEN regexp_matches(LOWER(comments), 'data center|datacenter')                                                    THEN 'Data center'
         WHEN regexp_matches(LOWER(comments), 'school|university|college|academy|classroom|education|dormitor|residence hall') THEN 'School / university'
         WHEN regexp_matches(LOWER(comments), 'hotel|guest room')                                                          THEN 'Hotel'
@@ -84,12 +84,12 @@ SELECT
         WHEN regexp_matches(LOWER(comments), 'apartment|condo|dwelling unit|\d+\s*units?\b|multi.?family|townhome')
              OR units_new > 0                                                                               THEN 'Apartments / condos'
         WHEN regexp_matches(LOWER(comments), 'light rail|transit|bus garage|o&m facility')                                THEN 'Transit'
-        WHEN regexp_matches(LOWER(comments), 'church|community center|library|indian center|park board')                  THEN 'Civic / community'
+        WHEN regexp_matches(LOWER(comments), 'church|community center|library|indian center|park board|ymca')                  THEN 'Civic / community'
+        WHEN regexp_matches(LOWER(comments), 'retail|restaurant|grocery|\bstores?\b|costco|target')                            THEN 'Retail'
         WHEN regexp_matches(LOWER(comments), 'office|tenant improvement|t/i|occupancy:\s*b\b|core and shell|shell and core|floors? \d') THEN 'Office'
         WHEN regexp_matches(LOWER(comments), 'parking ramp|parking structure|parking garage|\bramp\b')                     THEN 'Parking'
         WHEN regexp_matches(LOWER(comments), 'warehouse|industrial|manufactur|distribution')                             THEN 'Industrial / warehouse'
-        WHEN regexp_matches(LOWER(comments), 'retail|restaurant|grocery|store|costco|target')                            THEN 'Retail'
-            ELSE 'Other / unspecified'
+        ELSE 'Other / unspecified'
     END AS building_type,
     YEAR(issued_at)        AS year,
     work_type,
@@ -99,7 +99,25 @@ SELECT
     units_new,
     lat,
     lon,
-    LEFT(comments, 140)    AS description
+    -- Plain-language description: drop permit boilerplate (inspection notes, code
+    -- references, cross-references), keep the first sentence, cut at a word boundary,
+    -- and use sentence case so ALL-CAPS and all-lowercase entries read the same.
+    (
+        WITH c AS (
+            SELECT TRIM(REGEXP_REPLACE(
+                REGEXP_EXTRACT(
+                    REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(LOWER(comments), '^\(dmh - projectdox\)\s*', ''), '\s+', ' ', 'g'),
+                        '\b(approx|n|s|e|w|st|ave|sq|ft|no|bldg)\.', '\1', 'g'),
+                    '^(.*?)(\.\s|certificate of occupancy|special insp|\bsck\b|const(ruction)? type|engineer|architect|\*|see permit|also see|\bper bldg|$)',
+                    1),
+                '[\s,;:.-]+$', '')) AS t
+        )
+        SELECT CASE
+            WHEN LENGTH(t) <= 110 THEN UPPER(LEFT(t, 1)) || SUBSTR(t, 2)
+            ELSE UPPER(LEFT(t, 1)) || SUBSTR(REGEXP_REPLACE(LEFT(t, 110), '\s+\S*$', ''), 2) || '…'
+        END
+        FROM c
+    )                      AS description
 FROM permits
 WHERE permit_type = 'Commercial'
   AND permit_value >= 10000000
